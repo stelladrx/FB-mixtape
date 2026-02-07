@@ -3,149 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biro & Tape | Custom Mixtape</title>
+    <title>VibeTape // 80s Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Courier+Prime&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=Outfit:wght@300;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --plastic-shine: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%);
+        body {
+            background-color: #0f0f12;
+            background-image: radial-gradient(circle at 50% 50%, #1e1e24 0%, #0f0f12 100%);
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
         }
-        body { background: #e5e5e1; background-image: radial-gradient(#d1d1d1 1px, transparent 1px); background-size: 20px 20px; }
-        .biro-script { font-family: 'Caveat', cursive; color: #1a2a6c; line-height: 1.1; }
-        
-        /* Photorealistic Cassette */
-        .cassette-case {
-            background: #1a1a1a;
-            border-radius: 12px;
-            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.5), inset 0 0 10px #000;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #333;
-        }
-        .cassette-label {
-            background: #fdfdfd;
-            background-image: repeating-linear-gradient(#f0f0f0 0px, #f0f0f0 1px, transparent 1px, transparent 15px);
-            border-bottom: 12px solid #c0392b;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-        }
-        .tape-window-realistic {
-            background: #0a0a0a;
-            box-shadow: inset 0 0 15px #000;
-            border: 3px solid #222;
-            position: relative;
-        }
-        .gear {
-            width: 40px;
-            height: 40px;
-            background: radial-gradient(circle, #ddd 20%, #333 21%, #333 100%);
-            border: 4px dashed #111;
-            border-radius: 50%;
-        }
-        .spinning { animation: rotate 3s linear infinite; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* J-Card Paper Texture */
+        /* The Biro Pen Script */
+        .biro-script { 
+            font-family: 'Reenie Beanie', cursive; 
+            color: #2b4570; /* Classic blue pen ink */
+            font-size: 1.75rem;
+            line-height: 0.9;
+            transform: rotate(-1deg);
+        }
+
+        /* 80s Photorealistic Transparent Cassette */
+        .cassette-box {
+            background: rgba(40, 40, 45, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        .tape-label {
+            background: #e2e2e2;
+            background-image: linear-gradient(to bottom, #d1d1d1 0%, #fff 20%, #fff 80%, #d1d1d1 100%);
+            border-left: 15px solid #ff4d6d; /* Gen Z Pink */
+            border-right: 15px solid #48cae4; /* 80s Teal */
+        }
+
+        .reel {
+            width: 70px;
+            height: 70px;
+            background: #111;
+            border: 6px solid #222;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .reel::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 20px; height: 2px;
+            background: #444;
+            transform: translate(-50%, -50%);
+        }
+
+        .spinning { animation: spin 2s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* J-Card / Tracklist */
         .j-card {
-            background: #fff;
-            box-shadow: 2px 5px 15px rgba(0,0,0,0.1);
-            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            background: #fdfdfd;
+            border-radius: 2px;
+            box-shadow: 10px 10px 0px #ff4d6d;
+            background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
+        }
+
+        .input-glow:focus {
+            box-shadow: 0 0 20px rgba(72, 202, 228, 0.4);
+        }
+
+        .noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; opacity: 0.05; z-index: 9999;
+            background-image: url('https://media.giphy.com/media/oEI9uWU0WMrQmOsh6h/giphy.gif');
         }
     </style>
 </head>
-<body class="p-6">
+<body class="min-h-screen flex flex-col items-center justify-start p-8">
+    <div class="noise"></div>
 
-    <div class="max-w-xl mx-auto">
-        <header class="text-center mb-10">
-            <h1 class="text-3xl font-bold tracking-widest uppercase text-gray-800" style="font-family: 'Courier Prime';">Mixtape Lab v1.0</h1>
-            <div class="mt-4 flex gap-2">
-                <input id="vibeInput" type="text" placeholder="e.g. 80s Sunset, Midnight Drive..." class="w-full p-3 border-b-2 border-black bg-transparent outline-none italic">
-                <button onclick="generateMixtape()" class="bg-black text-white px-6 py-2 hover:bg-gray-800 transition">GENERATE</button>
-            </div>
-        </header>
+    <div class="w-full max-w-lg z-10">
+        <div class="text-center mb-12">
+            <span class="text-xs tracking-[0.4em] text-cyan-400 uppercase font-bold">Retro-Synth Generator</span>
+            <h1 class="text-6xl font-black italic tracking-tighter mt-2 bg-gradient-to-r from-pink-500 to-cyan-400 bg-clip-text text-transparent">VIBE-TAPE</h1>
+        </div>
 
-        <div id="output" class="hidden space-y-12">
-            <div class="cassette-case w-full aspect-[1.6/1] p-4 flex flex-col justify-between">
-                <div class="cassette-label w-full h-3/5 rounded-sm p-4 flex flex-col items-center">
-                    <div id="tapeTitle" class="biro-script text-4xl mt-2 text-blue-900"></div>
+        <div class="relative group mb-16">
+            <input id="vibeInput" type="text" placeholder="DROP A MOOD..." 
+                class="w-full bg-transparent border-b-2 border-white/20 p-4 text-2xl outline-none text-center transition-all input-glow uppercase tracking-widest font-bold focus:border-cyan-400">
+            <button onclick="mixTape()" class="mt-6 w-full py-4 bg-white text-black font-black hover:bg-cyan-400 transition-colors tracking-widest text-sm">GENERATE MIXTAPE</button>
+        </div>
+
+        <div id="tapeUI" class="hidden opacity-0 transition-opacity duration-1000">
+            <div class="cassette-box p-6 mb-12">
+                <div class="tape-label h-32 rounded flex flex-col items-center justify-center relative overflow-hidden">
+                    <div id="displayTitle" class="biro-script text-4xl z-10"></div>
                 </div>
                 
-                <div class="flex justify-center gap-12 -mt-10">
-                    <div class="tape-window-realistic w-48 h-16 rounded-full flex justify-around items-center">
-                        <div id="gearLeft" class="gear"></div>
-                        <div id="gearRight" class="gear"></div>
+                <div class="flex justify-center gap-16 mt-6 relative h-24 items-center">
+                    <div id="reelL" class="reel"></div>
+                    <div class="w-24 h-12 bg-black/40 rounded-sm border border-white/10 flex items-center justify-center">
+                        <span class="text-[8px] text-white/20 font-mono">TAPE FLOWING</span>
                     </div>
-                </div>
-
-                <div class="flex justify-between text-[10px] text-gray-500 font-mono px-4 pb-2">
-                    <span>NR [ON]</span>
-                    <span>TYPE II - CHROME</span>
-                    <span>90 MIN</span>
+                    <div id="reelR" class="reel"></div>
                 </div>
             </div>
 
-            <div class="j-card p-10 relative border-l-8 border-red-600">
-                <div class="absolute top-4 right-4 text-xs text-gray-400 font-mono uppercase">Side A</div>
-                <h2 class="biro-script text-3xl mb-6 underline decoration-pink-300">Tracklist</h2>
-                <ol id="trackList" class="biro-script text-2xl space-y-1 ml-4"></ol>
-                
-                <div class="mt-10 flex justify-between items-end">
-                    <div class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Recorded on 07/02/2026</div>
-                    <a id="spotifyBtn" href="#" target="_blank" class="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg hover:scale-105 transition-transform">LISTEN ON SPOTIFY</a>
+            <div class="j-card p-8 rotate-1">
+                <div class="flex justify-between items-start border-b border-black/10 pb-2 mb-4">
+                    <span class="text-black font-black text-xs italic">A-SIDE // 10 TRACKS</span>
+                    <span id="dateStamp" class="text-black/40 text-[10px] font-mono"></span>
+                </div>
+                <ul id="trackList" class="biro-script list-decimal pl-6">
+                    </ul>
+                <div class="mt-8 flex justify-center">
+                    <a id="spotLink" target="_blank" class="px-8 py-3 bg-[#1DB954] text-white rounded-full font-bold text-xs hover:scale-105 transition-transform">OPEN ON SPOTIFY</a>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const library = [
-            { t: "Never Gonna Give You Up", a: "Rick Astley" },
-            { t: "Take on Me", a: "A-ha" },
-            { t: "Careless Whisper", a: "George Michael" },
-            { t: "Billie Jean", a: "Michael Jackson" },
-            { t: "Africa", a: "Toto" },
-            { t: "Smalltown Boy", a: "Bronski Beat" },
-            { t: "Sweet Dreams", a: "Eurythmics" },
-            { t: "Bette Davis Eyes", a: "Kim Carnes" },
-            { t: "Time After Time", a: "Cyndi Lauper" },
-            { t: "The Winner Takes It All", a: "ABBA" },
-            { t: "Self Control", a: "Laura Branigan" },
-            { t: "Drive", a: "The Cars" },
-            { t: "Don't You Want Me", a: "The Human League" },
-            { t: "West End Girls", a: "Pet Shop Boys" },
-            { t: "True", a: "Spandau Ballet" }
+        const retroSongs = [
+            { t: "Dreams", a: "Fleetwood Mac" }, { t: "Everybody Wants to Rule the World", a: "Tears for Fears" },
+            { t: "Self Control", a: "Laura Branigan" }, { t: "Blue Monday", a: "New Order" },
+            { t: "Nightcall", a: "Kavinsky" }, { t: "Out of Touch", a: "Hall & Oates" },
+            { t: "The Less I Know The Better", a: "Tame Impala" }, { t: "Smalltown Boy", a: "Bronski Beat" },
+            { t: "West End Girls", a: "Pet Shop Boys" }, { t: "Borderline", a: "Madonna" },
+            { t: "Enjoy the Silence", a: "Depeche Mode" }, { t: "Electric Feel", a: "MGMT" },
+            { t: "Careless Whisper", a: "George Michael" }, { t: "Blinding Lights", a: "The Weeknd" }
         ];
 
-        function generateMixtape() {
+        function mixTape() {
             const vibe = document.getElementById('vibeInput').value;
-            if (!vibe) return;
+            if(!vibe) return;
 
-            // Start animation
-            document.getElementById('gearLeft').classList.add('spinning');
-            document.getElementById('gearRight').classList.add('spinning');
-            
-            // Randomize 10 songs
-            const shuffled = [...library].sort(() => 0.5 - Math.random()).slice(0, 10);
-            
+            // Trigger Reels
+            document.getElementById('reelL').classList.add('spinning');
+            document.getElementById('reelR').classList.add('spinning');
+
             setTimeout(() => {
-                document.getElementById('output').classList.remove('hidden');
-                document.getElementById('tapeTitle').innerText = vibe;
-                
+                const ui = document.getElementById('tapeUI');
+                ui.classList.remove('hidden');
+                setTimeout(() => ui.classList.add('opacity-100'), 10);
+
+                document.getElementById('displayTitle').innerText = vibe;
+                document.getElementById('dateStamp').innerText = new Date().toLocaleDateString();
+
                 const list = document.getElementById('trackList');
                 list.innerHTML = "";
-                shuffled.forEach((s, i) => {
+                const picks = [...retroSongs].sort(() => 0.5 - Math.random()).slice(0, 10);
+                
+                picks.forEach(song => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<span class="opacity-50 text-sm mr-2">${i+1}</span> ${s.t} - ${s.a}`;
+                    li.className = "mb-1";
+                    li.innerText = `${song.t} — ${song.a}`;
                     list.appendChild(li);
                 });
 
-                const query = encodeURIComponent(vibe + " mix");
-                document.getElementById('spotifyBtn').href = `https://open.spotify.com/search/${query}`;
+                const query = encodeURIComponent(vibe + " 80s retro vibe");
+                document.getElementById('spotLink').href = `https://open.spotify.com/search/${query}`;
                 
-                document.getElementById('gearLeft').classList.remove('spinning');
-                document.getElementById('gearRight').classList.remove('spinning');
-                
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            }, 1000);
+                document.getElementById('reelL').classList.remove('spinning');
+                document.getElementById('reelR').classList.remove('spinning');
+            }, 1200);
         }
     </script>
 </body>
