@@ -3,126 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Mixtape Generator</title>
+    <title>Biro & Tape | Custom Mixtape</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Courier+Prime&display=swap" rel="stylesheet">
     <style>
-        .handwritten { font-family: 'Permanent+Marker', cursive; }
-        .cassette-body {
-            background: #222;
-            border-radius: 15px;
+        :root {
+            --plastic-shine: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%);
+        }
+        body { background: #e5e5e1; background-image: radial-gradient(#d1d1d1 1px, transparent 1px); background-size: 20px 20px; }
+        .biro-script { font-family: 'Caveat', cursive; color: #1a2a6c; line-height: 1.1; }
+        
+        /* Photorealistic Cassette */
+        .cassette-case {
+            background: #1a1a1a;
+            border-radius: 12px;
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.5), inset 0 0 10px #000;
             position: relative;
-            box-shadow: inset 0 0 20px #000, 10px 10px 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 1px solid #333;
         }
-        .tape-window {
-            background: #333;
-            border: 4px solid #444;
-            height: 60px;
-            width: 140px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
+        .cassette-label {
+            background: #fdfdfd;
+            background-image: repeating-linear-gradient(#f0f0f0 0px, #f0f0f0 1px, transparent 1px, transparent 15px);
+            border-bottom: 12px solid #c0392b;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
         }
-        .spool {
-            width: 30px;
-            height: 30px;
-            background: #666;
+        .tape-window-realistic {
+            background: #0a0a0a;
+            box-shadow: inset 0 0 15px #000;
+            border: 3px solid #222;
+            position: relative;
+        }
+        .gear {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ddd 20%, #333 21%, #333 100%);
+            border: 4px dashed #111;
             border-radius: 50%;
-            border: 4px dashed #888;
-            animation: spin 4s linear infinite paused;
         }
-        .generating .spool { animation-play-state: running; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spinning { animation: rotate 3s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* J-Card Paper Texture */
+        .j-card {
+            background: #fff;
+            box-shadow: 2px 5px 15px rgba(0,0,0,0.1);
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+        }
     </style>
 </head>
-<body class="bg-amber-50 min-h-screen flex flex-col items-center py-10 px-4 font-mono">
+<body class="p-6">
 
-    <div class="max-w-2xl w-full text-center">
-        <h1 class="text-4xl font-bold mb-2 text-red-600 uppercase tracking-tighter italic">Analog Vibe Machine</h1>
-        <p class="mb-8 text-gray-600">Enter a mood (e.g., "Late Night Drive", "Summer 84", "Neon Disco")</p>
+    <div class="max-w-xl mx-auto">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-bold tracking-widest uppercase text-gray-800" style="font-family: 'Courier Prime';">Mixtape Lab v1.0</h1>
+            <div class="mt-4 flex gap-2">
+                <input id="vibeInput" type="text" placeholder="e.g. 80s Sunset, Midnight Drive..." class="w-full p-3 border-b-2 border-black bg-transparent outline-none italic">
+                <button onclick="generateMixtape()" class="bg-black text-white px-6 py-2 hover:bg-gray-800 transition">GENERATE</button>
+            </div>
+        </header>
 
-        <div class="flex gap-2 mb-12">
-            <input id="vibeInput" type="text" placeholder="What's the vibe?" class="flex-1 p-3 border-2 border-black rounded shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] outline-none focus:bg-yellow-50">
-            <button onclick="generateTape()" class="bg-red-500 text-white px-6 py-2 font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all">BURN TAPE</button>
-        </div>
-
-        <div id="mixtapeContainer" class="hidden">
-            <div class="cassette-body p-6 mx-auto w-full max-w-md aspect-[1.6/1] flex flex-col justify-between items-center border-4 border-gray-800">
-                <div class="bg-gray-200 w-full h-32 rounded p-4 flex flex-col justify-center items-center border-b-8 border-red-500">
-                    <span id="tapeTitle" class="handwritten text-2xl text-blue-800 border-b-2 border-blue-300 w-full text-center"></span>
-                    <div class="tape-window mt-4">
-                        <div class="spool"></div>
-                        <div class="spool"></div>
+        <div id="output" class="hidden space-y-12">
+            <div class="cassette-case w-full aspect-[1.6/1] p-4 flex flex-col justify-between">
+                <div class="cassette-label w-full h-3/5 rounded-sm p-4 flex flex-col items-center">
+                    <div id="tapeTitle" class="biro-script text-4xl mt-2 text-blue-900"></div>
+                </div>
+                
+                <div class="flex justify-center gap-12 -mt-10">
+                    <div class="tape-window-realistic w-48 h-16 rounded-full flex justify-around items-center">
+                        <div id="gearLeft" class="gear"></div>
+                        <div id="gearRight" class="gear"></div>
                     </div>
                 </div>
-                <div class="w-full flex justify-between px-10 text-gray-600 text-xs mt-2">
-                    <span>A | SIDE</span>
+
+                <div class="flex justify-between text-[10px] text-gray-500 font-mono px-4 pb-2">
+                    <span>NR [ON]</span>
+                    <span>TYPE II - CHROME</span>
                     <span>90 MIN</span>
                 </div>
             </div>
 
-            <div class="mt-8 bg-white p-8 shadow-xl rotate-1 max-w-md mx-auto border border-gray-200">
-                <h3 class="handwritten text-xl mb-4 text-red-500">Tracklist:</h3>
-                <ul id="trackList" class="handwritten text-left text-lg space-y-1 text-gray-800">
-                    </ul>
-                <hr class="my-6">
-                <a id="spotifyLink" href="#" target="_blank" class="inline-block bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-green-600 transition-colors">
-                    LISTEN ON SPOTIFY
-                </a>
+            <div class="j-card p-10 relative border-l-8 border-red-600">
+                <div class="absolute top-4 right-4 text-xs text-gray-400 font-mono uppercase">Side A</div>
+                <h2 class="biro-script text-3xl mb-6 underline decoration-pink-300">Tracklist</h2>
+                <ol id="trackList" class="biro-script text-2xl space-y-1 ml-4"></ol>
+                
+                <div class="mt-10 flex justify-between items-end">
+                    <div class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Recorded on 07/02/2026</div>
+                    <a id="spotifyBtn" href="#" target="_blank" class="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg hover:scale-105 transition-transform">LISTEN ON SPOTIFY</a>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const songLibrary = [
-            { title: "Dreams", artist: "Fleetwood Mac", vibes: ["chill", "summer", "calm", "roadtrip"] },
-            { title: "Blue Monday", artist: "New Order", vibes: ["dance", "neon", "80s", "night"] },
-            { title: "Nightcall", artist: "Kavinsky", vibes: ["drive", "neon", "noir", "synth"] },
-            { title: "September", artist: "Earth, Wind & Fire", vibes: ["party", "happy", "disco"] },
-            { title: "Under the Milky Way", artist: "The Church", vibes: ["goth", "dreamy", "night"] },
-            { title: "Everybody Wants to Rule the World", artist: "Tears for Fears", vibes: ["80s", "nostalgia", "happy"] },
-            { title: "Fast Car", artist: "Tracy Chapman", vibes: ["roadtrip", "mellow", "story"] },
-            { title: "Smooth Operator", artist: "Sade", vibes: ["smooth", "jazz", "classy"] }
+        const library = [
+            { t: "Never Gonna Give You Up", a: "Rick Astley" },
+            { t: "Take on Me", a: "A-ha" },
+            { t: "Careless Whisper", a: "George Michael" },
+            { t: "Billie Jean", a: "Michael Jackson" },
+            { t: "Africa", a: "Toto" },
+            { t: "Smalltown Boy", a: "Bronski Beat" },
+            { t: "Sweet Dreams", a: "Eurythmics" },
+            { t: "Bette Davis Eyes", a: "Kim Carnes" },
+            { t: "Time After Time", a: "Cyndi Lauper" },
+            { t: "The Winner Takes It All", a: "ABBA" },
+            { t: "Self Control", a: "Laura Branigan" },
+            { t: "Drive", a: "The Cars" },
+            { t: "Don't You Want Me", a: "The Human League" },
+            { t: "West End Girls", a: "Pet Shop Boys" },
+            { t: "True", a: "Spandau Ballet" }
         ];
 
-        function generateTape() {
-            const input = document.getElementById('vibeInput').value.toLowerCase();
-            const container = document.getElementById('mixtapeContainer');
-            const trackListEl = document.getElementById('trackList');
-            const tapeTitle = document.getElementById('tapeTitle');
-            
-            if(!input) return alert("Enter a vibe first!");
+        function generateMixtape() {
+            const vibe = document.getElementById('vibeInput').value;
+            if (!vibe) return;
 
-            // Animation effect
-            document.querySelector('.cassette-body').classList.add('generating');
+            // Start animation
+            document.getElementById('gearLeft').classList.add('spinning');
+            document.getElementById('gearRight').classList.add('spinning');
             
-            // Filter songs based on vibe keyword or random selection
-            let selectedSongs = songLibrary.filter(s => s.vibes.some(v => input.includes(v)));
-            if(selectedSongs.length < 3) {
-                selectedSongs = [...songLibrary].sort(() => 0.5 - Math.random()).slice(0, 5);
-            }
-
-            // Update UI
+            // Randomize 10 songs
+            const shuffled = [...library].sort(() => 0.5 - Math.random()).slice(0, 10);
+            
             setTimeout(() => {
-                container.classList.remove('hidden');
-                tapeTitle.innerText = input.toUpperCase() + " MIX";
-                trackListEl.innerHTML = "";
+                document.getElementById('output').classList.remove('hidden');
+                document.getElementById('tapeTitle').innerText = vibe;
                 
-                let searchTerms = [];
-                selectedSongs.forEach((song, i) => {
+                const list = document.getElementById('trackList');
+                list.innerHTML = "";
+                shuffled.forEach((s, i) => {
                     const li = document.createElement('li');
-                    li.innerText = `${i + 1}. ${song.title} - ${song.artist}`;
-                    trackListEl.appendChild(li);
-                    searchTerms.push(`${song.title} ${song.artist}`);
+                    li.innerHTML = `<span class="opacity-50 text-sm mr-2">${i+1}</span> ${s.t} - ${s.a}`;
+                    list.appendChild(li);
                 });
 
-                // Generate Spotify Search Link
-                const query = encodeURIComponent(searchTerms.join(" "));
-                document.getElementById('spotifyLink').href = `https://open.spotify.com/search/${encodeURIComponent(input + " retro")}`;
+                const query = encodeURIComponent(vibe + " mix");
+                document.getElementById('spotifyBtn').href = `https://open.spotify.com/search/${query}`;
                 
-                document.querySelector('.cassette-body').classList.remove('generating');
-            }, 800);
+                document.getElementById('gearLeft').classList.remove('spinning');
+                document.getElementById('gearRight').classList.remove('spinning');
+                
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 1000);
         }
     </script>
 </body>
