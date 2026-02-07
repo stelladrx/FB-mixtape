@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Mixtape Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .handwritten { font-family: 'Permanent+Marker', cursive; }
+        .cassette-body {
+            background: #222;
+            border-radius: 15px;
+            position: relative;
+            box-shadow: inset 0 0 20px #000, 10px 10px 20px rgba(0,0,0,0.3);
+        }
+        .tape-window {
+            background: #333;
+            border: 4px solid #444;
+            height: 60px;
+            width: 140px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .spool {
+            width: 30px;
+            height: 30px;
+            background: #666;
+            border-radius: 50%;
+            border: 4px dashed #888;
+            animation: spin 4s linear infinite paused;
+        }
+        .generating .spool { animation-play-state: running; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-amber-50 min-h-screen flex flex-col items-center py-10 px-4 font-mono">
+
+    <div class="max-w-2xl w-full text-center">
+        <h1 class="text-4xl font-bold mb-2 text-red-600 uppercase tracking-tighter italic">Analog Vibe Machine</h1>
+        <p class="mb-8 text-gray-600">Enter a mood (e.g., "Late Night Drive", "Summer 84", "Neon Disco")</p>
+
+        <div class="flex gap-2 mb-12">
+            <input id="vibeInput" type="text" placeholder="What's the vibe?" class="flex-1 p-3 border-2 border-black rounded shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] outline-none focus:bg-yellow-50">
+            <button onclick="generateTape()" class="bg-red-500 text-white px-6 py-2 font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all">BURN TAPE</button>
+        </div>
+
+        <div id="mixtapeContainer" class="hidden">
+            <div class="cassette-body p-6 mx-auto w-full max-w-md aspect-[1.6/1] flex flex-col justify-between items-center border-4 border-gray-800">
+                <div class="bg-gray-200 w-full h-32 rounded p-4 flex flex-col justify-center items-center border-b-8 border-red-500">
+                    <span id="tapeTitle" class="handwritten text-2xl text-blue-800 border-b-2 border-blue-300 w-full text-center"></span>
+                    <div class="tape-window mt-4">
+                        <div class="spool"></div>
+                        <div class="spool"></div>
+                    </div>
+                </div>
+                <div class="w-full flex justify-between px-10 text-gray-600 text-xs mt-2">
+                    <span>A | SIDE</span>
+                    <span>90 MIN</span>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-white p-8 shadow-xl rotate-1 max-w-md mx-auto border border-gray-200">
+                <h3 class="handwritten text-xl mb-4 text-red-500">Tracklist:</h3>
+                <ul id="trackList" class="handwritten text-left text-lg space-y-1 text-gray-800">
+                    </ul>
+                <hr class="my-6">
+                <a id="spotifyLink" href="#" target="_blank" class="inline-block bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-green-600 transition-colors">
+                    LISTEN ON SPOTIFY
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const songLibrary = [
+            { title: "Dreams", artist: "Fleetwood Mac", vibes: ["chill", "summer", "calm", "roadtrip"] },
+            { title: "Blue Monday", artist: "New Order", vibes: ["dance", "neon", "80s", "night"] },
+            { title: "Nightcall", artist: "Kavinsky", vibes: ["drive", "neon", "noir", "synth"] },
+            { title: "September", artist: "Earth, Wind & Fire", vibes: ["party", "happy", "disco"] },
+            { title: "Under the Milky Way", artist: "The Church", vibes: ["goth", "dreamy", "night"] },
+            { title: "Everybody Wants to Rule the World", artist: "Tears for Fears", vibes: ["80s", "nostalgia", "happy"] },
+            { title: "Fast Car", artist: "Tracy Chapman", vibes: ["roadtrip", "mellow", "story"] },
+            { title: "Smooth Operator", artist: "Sade", vibes: ["smooth", "jazz", "classy"] }
+        ];
+
+        function generateTape() {
+            const input = document.getElementById('vibeInput').value.toLowerCase();
+            const container = document.getElementById('mixtapeContainer');
+            const trackListEl = document.getElementById('trackList');
+            const tapeTitle = document.getElementById('tapeTitle');
+            
+            if(!input) return alert("Enter a vibe first!");
+
+            // Animation effect
+            document.querySelector('.cassette-body').classList.add('generating');
+            
+            // Filter songs based on vibe keyword or random selection
+            let selectedSongs = songLibrary.filter(s => s.vibes.some(v => input.includes(v)));
+            if(selectedSongs.length < 3) {
+                selectedSongs = [...songLibrary].sort(() => 0.5 - Math.random()).slice(0, 5);
+            }
+
+            // Update UI
+            setTimeout(() => {
+                container.classList.remove('hidden');
+                tapeTitle.innerText = input.toUpperCase() + " MIX";
+                trackListEl.innerHTML = "";
+                
+                let searchTerms = [];
+                selectedSongs.forEach((song, i) => {
+                    const li = document.createElement('li');
+                    li.innerText = `${i + 1}. ${song.title} - ${song.artist}`;
+                    trackListEl.appendChild(li);
+                    searchTerms.push(`${song.title} ${song.artist}`);
+                });
+
+                // Generate Spotify Search Link
+                const query = encodeURIComponent(searchTerms.join(" "));
+                document.getElementById('spotifyLink').href = `https://open.spotify.com/search/${encodeURIComponent(input + " retro")}`;
+                
+                document.querySelector('.cassette-body').classList.remove('generating');
+            }, 800);
+        }
+    </script>
+</body>
+</html>
